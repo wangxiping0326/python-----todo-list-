@@ -1,5 +1,8 @@
 from core import Todo_list
 import sys
+import json
+import os
+from datetime import datetime
 
 class TodoCLI:
     def __init__(self):
@@ -13,7 +16,7 @@ class TodoCLI:
         print("1. 📝 添加新任务")
         print("2. 📋 查看所有任务")
         print("3. ✅ 标记任务状态")
-        print("4. 🗑️  删除任务")
+        print("4. 🗑️ 删除任务")
         print("5. 🔍 搜索任务")
         print("6. 📊 数据统计")
         print("7. 💾 保存并退出")
@@ -82,7 +85,6 @@ class TodoCLI:
         except ValueError:
             print(f"❌ 请输入有效的任务ID")
 
-
     def handle_delete_task(self):
         print("\n" + "-" * 30)
         print("删除任务")
@@ -124,7 +126,6 @@ class TodoCLI:
                 print(task)
         print(f"没有找到与{search_keyword}相关的任务")
 
-
     def handle_task_data(self):
         print("\n" + "-" * 30)
         print("显示任务数据")
@@ -133,6 +134,29 @@ class TodoCLI:
             print("📭 还没有任务，快去添加一个吧！")
             return
 
+    def handle_save_to_json(self):
+        """处理保存到JSON文件"""
+        print("\n" + "-" * 30)
+        print("💾 保存到JSON文件")
+        print("-" * 30)
+
+        if not self.todo.tasks:
+            print("📭 没有任务可以保存")
+            return
+
+        # 获取文件名（可选）
+        filename = input("输入文件名 (直接回车使用默认 tasks.json): ").strip()
+        if not filename:
+            filename = "tasks.json"
+
+        # 设置文件名
+        self.todo.filename = filename
+
+        # 保存
+        if self.todo.save_to_json():
+            print(f"✅ 任务已保存到 {filename}")
+        else:
+            print("❌ 保存失败")
 
     def run(self):
         while True:
@@ -158,14 +182,9 @@ class TodoCLI:
                 pass
             elif choice ==7:
                 print("💾 保存数据...")
-                # TODO: 实现保存功能
+                self.handle_save_to_json()
                 print("👋 再见！")
                 break  # ← 退出循环
-
-
-
-
-
 
 ####################测试代码###############################
 class TodoCLITester:
@@ -345,8 +364,6 @@ class TodoCLITester:
             print("🎉 所有测试通过！")
         else:
             print("⚠️  有测试失败，请检查")
-
-
 if __name__ == "__main__":
     # 检查是否有测试参数
     if len(sys.argv) > 1 and sys.argv[1] == "test":

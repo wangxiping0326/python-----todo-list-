@@ -1,7 +1,8 @@
 from operator import index
 from symtable import Class
 from datetime import datetime
-
+import json
+import  os
 from django.contrib.admin.templatetags.admin_list import results
 
 
@@ -36,15 +37,20 @@ class Task:#这个类明确分工管理任务信息
 
 class Todo_list:
 
-    def __init__(self):
+    def __init__(self,filename="tasks.json"):
+        self.filename = filename
         self.tasks = []#生成一个存储任务清单的列表
         self.next_id = 1
+        #self.load_data()
 
     def add_task(self,description):
         print("新建任务")
         new_task = Task(self.next_id,description)#创建一个新的task对象
         self.tasks.append(new_task)#将新的任务对象存放到任务清单列表里
         self.next_id += 1
+
+        #新：自动保存
+        self.save_data_to_json()
         return new_task
 
     def print_all(self):
@@ -74,8 +80,6 @@ class Todo_list:
                 search_task_results.append(task)
         return search_task_results
 
-
-
     def delete_task(self,task_id):
         """删除任务并且自动重新编号"""
         task,index = self.get_task(task_id)
@@ -87,6 +91,8 @@ class Todo_list:
         print(f"任务：{removed_task}已被删除")
         #自动重新编号
         self._renumber_tasks()
+        # 新：自动保存
+        self.save_data_to_json()
 
         return removed_task
 
@@ -97,6 +103,35 @@ class Todo_list:
             # 更新下一个可用ID
         self.next_id = len(self.tasks) + 1
 
+    def save_data_to_json(self):
+        """保存任务到JSON文件"""
+        try:
+        # 1. 准备要保存的数据结构
+            data_to_save= {
+                "next_id": self.next_id,  # 保存下一个可用的ID
+                "tasks": []  # 保存所有任务
+            }
+        # 2. 将每个任务转换为字典
+            for task in self.tasks:
+                task_dict = {
+                    "id": task.id,
+                    "description": task.description,
+                    "status": task.status,
+                    "created_at": task.created_at.isoformat()  # 时间转换为字符串
+                }
+
+                data_to_save["tasks"].append(task_dict)
+        # 3. 写入JSON文件
+            with open(self.filename,"w",encoding="utf-8") as f:
+                json.dump(data_to_save,f,
+                          indent = 2,
+                          ensure_ascii=False)  # 确保中文正常显示
+            print(f"✅ 数据已保存到: {self.filename}")
+            return True
+        except Exception as e:
+            print(f"❌ 保存失败: {e}")
+            return False
+    #def load_data(self):
 
 ####################测试代码###############################3
 if __name__ == "__main__":

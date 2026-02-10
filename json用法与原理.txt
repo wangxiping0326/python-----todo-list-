@@ -1,0 +1,91 @@
+📚 什么是 JSON？
+    JSON（JavaScript Object Notation） 是一种轻量级的数据交换格式。
+
+🎯 JSON 的基本结构
+    1. 对象（Object） - 用 {} 包围，像 Python 字典
+        {
+          "name": "张三",
+          "age": 25,
+          "is_student": true
+        }
+    2. 数组（Array） - 用 [] 包围，像 Python 列表
+        ["苹果", "香蕉", "橙子"]
+    3. 值（Value） - 可以是:
+        字符串："hello"（必须用双引号）
+        数字：123、3.14
+        布尔值：True、False
+        空值：null
+        对象或数组
+
+🔧 Python 中的 JSON模块
+    Python 内置了 json 模块，主要使用两个函数：Python 内置了 json 模块，主要使用两个函数：
+
+        函数	                作用	                   比喻
+    json.dump()	    把 Python 对象写入文件	        把书放进书柜
+    json.dumps()	把 Python 对象转换为字符串   	把书打包成包裹
+    json.load()	    从文件读取JSON到Python对象	    从书柜取出书
+    json.loads()	把字符串解析为Python对象	    打开包裹拿出书
+
+📝 JSON 保存的完整流程
+    第一步：数据准备（序列化）
+        # 需要把Python对象转换成JSON能理解的形式
+        # 1. datetime对象 → 字符串
+        task_dict = {
+            'id': 1,
+            'description': '学习Python',
+            'status': True,
+            'created_at': created_at.isoformat()  # "2024-01-15T10:30:00"
+        }
+
+        # 2. 构建完整数据结构
+        data_to_save = {
+            'next_id': 3,
+            'tasks': [task1_dict, task2_dict, ...]
+        }
+
+    第二步：写入文件
+        import json
+
+        with open('tasks.json', 'w', encoding='utf-8') as f:
+        json.dump(data_to_save, f, ensure_ascii=False, indent=2)
+
+        参数解释：
+
+        'w'：write 模式，写入文件（会覆盖原有内容）
+
+        encoding='utf-8'：确保中文正常保存
+
+        ensure_ascii=False：允许保存中文等非ASCII字符
+
+        indent=2：格式化，让文件更易读（每级缩进2空格）
+
+📖 JSON 读取的完整流程
+第一步：从文件读取
+
+    with open('tasks.json', 'r', encoding='utf-8') as f:
+    loaded_data = json.load(f)
+
+第二步：数据恢复（反序列化）
+    # 现在 loaded_data 是普通的Python字典
+    # 但需要把字符串转换回datetime对象
+
+    for task_data in loaded_data['tasks']:
+        task = Task(
+            task_id=task_data['id'],
+            description=task_data['description']
+        )
+        # 字符串 → datetime对象
+        task.created_at = datetime.fromisoformat(task_data['created_at'])
+        task.status = task_data['status']
+
+#可视化理解：数据流动
+
+内存中的Python对象
+     ↓ (序列化：Python → JSON字符串)
+JSON格式的字符串
+     ↓ (写入文件)
+📁 tasks.json 文件
+     ↓ (读取文件)
+JSON格式的字符串
+     ↓ (反序列化：JSON字符串 → Python)
+内存中的Python对象
